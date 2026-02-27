@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generator Không Trùng</title>
+
+<style>
+body{
+  font-family: monospace;
+  background:#0f172a;
+  color:white;
+  padding:20px;
+  text-align:center;
+}
+
+input{
+  padding:8px;
+  width:120px;
+  border-radius:6px;
+  border:none;
+  text-align:center;
+  margin:5px;
+}
+
+button{
+  padding:10px 16px;
+  margin:5px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+.generate{ background:#22c55e; }
+.copy{ background:#38bdf8; }
+.export{ background:#f59e0b; }
+
+textarea{
+  width:100%;
+  max-width:1000px;
+  height:250px;
+  margin-top:15px;
+  padding:12px;
+  border-radius:6px;
+  border:none;
+  resize:none;
+  background:#1e293b;
+  color:white;
+  font-size:13px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>Tạo 1/2 tập số - Không trùng</h2>
+
+<label>Số chữ số:</label>
+<input type="number" id="digits" value="4" min="1">
+
+<br>
+
+<button class="generate" onclick="generateHalfUnique()">Tạo</button>
+<button class="copy" onclick="copyText()">Copy</button>
+<button class="export" onclick="exportTxt()">Xuất TXT</button>
+
+<br>
+<textarea id="output" placeholder="Kết quả sẽ hiển thị ở đây..."></textarea>
+
+<script>
+
+function generateHalfUnique(){
+  const digits = parseInt(document.getElementById("digits").value);
+
+  if(!digits || digits <= 0){
+    alert("Nhập số hợp lệ.");
+    return;
+  }
+
+  const max = 10 ** digits;
+  const target = Math.floor(max / 2);
+
+  const set = new Set();
+
+  while(set.size < target){
+    const num = Math.floor(Math.random() * max)
+      .toString()
+      .padStart(digits,"0");
+    set.add(num);
+  }
+
+  const result = Array.from(set).map(n => `"${n}"`);
+  document.getElementById("output").value = result.join(",");
+}
+
+function copyText(){
+  const textarea = document.getElementById("output");
+  textarea.select();
+  textarea.setSelectionRange(0, 999999); 
+  document.execCommand("copy");
+  alert("Đã copy ✔");
+}
+
+function exportTxt(){
+  const content = document.getElementById("output").value;
+
+  if(!content){
+    alert("Chưa có dữ liệu.");
+    return;
+  }
+
+  const dataStr = "data:text/plain;charset=utf-8," + encodeURIComponent(content);
+  const link = document.createElement("a");
+  link.setAttribute("href", dataStr);
+  link.setAttribute("download", "numbers.txt");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+</script>
+
+</body>
+</html>
