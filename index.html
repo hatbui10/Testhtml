@@ -19,7 +19,7 @@ body {
 
 .container {
   background: rgba(255,255,255,0.05);
-  padding: 30px;
+  padding: 10px;
   border-radius: 20px;
   backdrop-filter: blur(15px);
   box-shadow: 0 0 40px rgba(0,255,255,0.3);
@@ -30,8 +30,8 @@ body {
 
 h2 {
   color: white;
-  margin: 35px auto;
-  font-size: 40px;
+  margin: 10px auto;
+  font-size: 30px;
 }
 h1 {
   color: red;
@@ -63,10 +63,10 @@ h1 {
 }
 
 .box {
-  width: 55px;
-  height: 60px;
-  margin: 6px;
-  font-size: 28px;
+  width: 45px;
+  height: 45px;
+  margin: 5px;
+  font-size: 18px;
   text-align: center;
   border-radius: 12px;
   border: none;
@@ -74,7 +74,7 @@ h1 {
 }
 
 .readonly {
-  background: #254F22;
+  background: #233D4D;
   color: #00ffff;
 }
 
@@ -83,39 +83,29 @@ h1 {
   color: #000;
 }
 
-#copyBox {
-  background: #982598;
-  color: white;
-  font-weight: bold;
-  width: 40%;
-  padding: 12px;
-  font-size: 30px;
-  border-radius: 12px;
-  border: none;
-  margin: 10px 0;
-  text-align: center;
-}
+
+
 
 #resultBox {
   background: #000;
   color: white;
-  font-size: 40px;
+  font-size: 30px;
   font-weight: bold;
   padding: 15px;
   border-radius: 12px;
   width: 120px;
-  margin: 10px auto;
+  margin: 6px auto;
 }
 
 .success {
-  background: red !important;
+  background: #261CC1 !important;
   color: white !important;
 
 }
 
 .fail {
-  background: #B7BDF7 !important;
-  color: red !important;
+  background: #6E5034 !important;
+  color: white !important;
 }
 
 
@@ -158,6 +148,50 @@ button:disabled {
 }
 
 
+/* Cột chứa toàn bộ phần copy */
+#copyColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+/* Copy 1 & Copy 2 (hai ô input giống nhau) */
+#copyBox1,
+#copyBox2 {
+  background: #982598;
+  color: white;
+  font-weight: bold;
+  width: 30%;
+  padding: 12px;
+  font-size: 30px;
+  border-radius: 12px;
+  border: none;
+  text-align: center;
+}
+
+/* Textarea lưu danh sách */
+#copyBoxTextarea {
+  width: 70%;
+  height: 100px;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 16px;
+  resize: none;
+  border: none;
+  outline: none;
+}
+
+.buttonRow {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  width: 100%;
+}
+
+
+
 </style>
 </head>
 
@@ -166,7 +200,50 @@ button:disabled {
 <div class="container">
 
   <h2>Kiểm Tra Chuỗi Số</h2>
+    <div id="resultBox">Đang tải...</div>
 
+  
+  <div id="boxes"></div>
+
+  <div id="copyColumn">
+
+  <!-- Copy 1 -->
+  <input 
+    type="text" 
+    id="copyBox1" 
+    readonly 
+    placeholder="copy 1"
+  >
+
+  <!-- Copy 2 -->
+  <input 
+    type="text" 
+    id="copyBox2" 
+    readonly 
+    placeholder="copy 2"
+  >
+
+  <!-- Textarea lưu danh sách -->
+  <textarea 
+    id="copyBoxTextarea" 
+    readonly 
+    placeholder="Danh sách đạt điều kiện"
+  ></textarea>
+
+ <div class="buttonRow">
+  <button id="copyBtn" onclick="copyToClipboard()">
+    Copy
+  </button>
+
+  <button onclick="exportTxt()">
+    Xuất TXT
+  </button>
+</div>
+
+</div>  
+  
+  
+  
   <div id="control">
    <h1> Số ô kiểm tra:</h1>
     
@@ -177,33 +254,38 @@ button:disabled {
   pattern="[0-9]*"
   min="1"
   max="20"
-  value="4"
+  value="3"
 >
     
         <button onclick="applyBoxCount()">Tạo</button>
   </div>
 
-  <div id="boxes"></div>
+</div>
 
-  <input type="text" id="copyBox" readonly placeholder="Giá trị copy">
-
-  <div id="resultBox">Đang tải...</div>
-
+ 
 </div>
 
 <script>
 
-const ipfsURL = "https://tomato-delicate-zebra-533.mypinata.cloud/ipfs/bafkreicpkddnxu3oqvshjx2e235lllo7sjkkawjxghnxkvv4s6egmjdnri";
+const ipfsURL = "https://tomato-delicate-zebra-533.mypinata.cloud/ipfs/bafkreia4ktxhh5a4kp7kpjdcwphge4f2a3njhself4eoorbhpwhv57slwu";
 
+// ===== DATA =====
 let dataSet = new Set();
 let currentDigits = [];
-let CHECK_BOX_COUNT = 4;
+let CHECK_BOX_COUNT = 3;
+let savedList = [];
+let prevDigits = [];
 
+// ===== DOM =====
 const boxesContainer = document.getElementById("boxes");
-const copyBox = document.getElementById("copyBox");
-const result = document.getElementById("resultBox");
 const boxCountInput = document.getElementById("boxCountInput");
+const result = document.getElementById("resultBox");
 
+const copyBox1 = document.getElementById("copyBox1");
+const copyBox2 = document.getElementById("copyBox2");
+const copyBoxTextarea = document.getElementById("copyBoxTextarea");
+
+const copyBtn = document.getElementById("copyBtn");
 function applyBoxCount() {
 
   const value = parseInt(boxCountInput.value);
@@ -214,6 +296,9 @@ function applyBoxCount() {
   currentDigits = [];
   createBoxes();
 }
+
+
+
 
 function createBoxes() {
 
@@ -244,6 +329,9 @@ function createBoxes() {
   focusInputBox();
 }
 
+
+
+
 function focusInputBox() {
   const all = boxesContainer.querySelectorAll("input");
   const inputBox = all[all.length - 1];
@@ -251,25 +339,39 @@ function focusInputBox() {
   inputBox.focus();
 }
 
+
+
+
 function handleInput(e) {
+  const digit = e.target.value.replace(/\D/g, "").slice(0,1);
+  if (!digit) return;
 
-  const val = e.target.value.replace(/\D/g, "");
-  if (!val) return;
-
-  currentDigits.push(val);
+  // Đẩy digit mới vào current
+  currentDigits.push(digit);
 
   if (currentDigits.length > CHECK_BOX_COUNT) {
-    currentDigits.shift();
+    const shifted = currentDigits.shift();
+
+    // shifted này chính là phần tử bị đẩy ra
+    prevDigits.push(shifted);
+
+    if (prevDigits.length > CHECK_BOX_COUNT) {
+      prevDigits.shift();
+    }
   }
 
   updateDisplay();
+  updateCopyBoxes();
 
-  if (currentDigits.length === CHECK_BOX_COUNT && dataSet.size > 0) {
+  if (currentDigits.length === CHECK_BOX_COUNT && dataSet.size) {
     checkValue();
   }
 
   focusInputBox();
 }
+
+
+
 
 function updateDisplay() {
 
@@ -280,11 +382,49 @@ function updateDisplay() {
   }
 }
 
+
+
+
 function checkValue() {
 
   const value = currentDigits.join("");
-  copyBox.value = value;
 
+  
+
+  // ===== Điều kiện: tất cả chữ số Copy1 >= 5 =====
+  const allDigitsGTE5 = value
+    .split("")
+    .every(d => Number(d) >= 5);
+
+  if (
+  allDigitsGTE5 &&
+  copyBox2.value.length === CHECK_BOX_COUNT
+) {
+
+    // Thêm vào danh sách (không thêm dấu " ở đây)
+    savedList.push(copyBox2.value);
+
+    // ===== SẮP XẾP TOÀN BỘ DANH SÁCH =====
+    savedList.sort((a, b) => Number(a) - Number(b));
+
+    // ===== Chia 20 số / dòng =====
+    const chunkSize = 20;
+    let lines = [];
+
+    for (let i = 0; i < savedList.length; i += chunkSize) {
+      lines.push(
+        savedList
+          .slice(i, i + chunkSize)
+          .map(v => `"${v}"`)
+          .join(",")
+      );
+    }
+
+    copyBoxTextarea.value = lines.join("\n");
+    copyBoxTextarea.scrollTop = copyBoxTextarea.scrollHeight;
+  }
+
+  // ===== Kiểm tra dataset =====
   result.classList.remove("success", "fail");
 
   if (dataSet.has(value)) {
@@ -295,6 +435,34 @@ function checkValue() {
     result.classList.add("fail");
   }
 }
+
+
+
+
+
+function copyToClipboard() {
+
+  const text = copyBoxTextarea.value;
+
+  if (!text) return;
+
+  navigator.clipboard.writeText(text)
+    .then(() => {
+      copyBtn.textContent = "Đã Copy";
+      setTimeout(() => {
+        copyBtn.textContent = "Copy";
+      }, 1000);
+    });
+}
+
+
+
+function updateCopyBoxes() {
+  copyBox1.value = currentDigits.join("");
+  copyBox2.value = prevDigits.join("");
+}
+
+
 
 fetch(ipfsURL)
   .then(res => res.text())
@@ -317,7 +485,43 @@ fetch(ipfsURL)
 
 createBoxes();
 
+
+function exportTxt() {
+
+  if (!savedList.length) return;
+
+  // Chia 20 số / dòng giống textarea
+  const chunkSize = 20;
+  let lines = [];
+
+  for (let i = 0; i < savedList.length; i += chunkSize) {
+    lines.push(savedList.slice(i, i + chunkSize).join(","));
+  }
+
+  const content = lines.join("\n");
+
+  const blob = new Blob([content], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "danhsach_so.txt";
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
+
+
+
+
 </script>
 
 </body>
 </html>
+
+
+
+
+
+
+
