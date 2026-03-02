@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Testhtml</title>
+<title>Kiểm Tra Chuỗi Số (Dynamic UI)</title>
 
 <style>
 body {
@@ -190,6 +190,34 @@ button:disabled {
   width: 100%;
 }
 
+  
+  #inputHistoryTextarea {
+  width: 70%;
+  height: 80px;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 16px;
+  resize: none;
+  border: none;
+  outline: none;
+}
+  
+  
+  #copyBoxTextarea3 {
+  width: 70%;
+  height: 100px;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 16px;
+  resize: none;
+  border: none;
+  outline: none;
+}
+  .neutral {
+  background: red !important;
+  color: white !important;
+  }
+  
 
 
 </style>
@@ -197,95 +225,163 @@ button:disabled {
 
 <body>
 
-<div class="container">
+
+  <div class="container">
 
   <h2>Kiểm Tra Chuỗi Số</h2>
-    <div id="resultBox">Đang tải...</div>
+  <div id="resultBox">Đang tải...</div>
 
-  
+  <!-- Ô hiển thị số -->
   <div id="boxes"></div>
 
+  <!-- Khu vực Copy -->
   <div id="copyColumn">
 
-  <!-- Copy 1 -->
-  <input 
-    type="text" 
-    id="copyBox1" 
-    readonly 
-    placeholder="copy 1"
-  >
+    <input
+      type="text"
+      id="copyBox1"
+      readonly
+      placeholder="Copy 1"
+    >
 
-  <!-- Copy 2 -->
-  <input 
-    type="text" 
-    id="copyBox2" 
-    readonly 
-    placeholder="copy 2"
-  >
+    <input
+      type="text"
+      id="copyBox2"
+      readonly
+      placeholder="Copy 2"
+    >
 
-  <!-- Textarea lưu danh sách -->
-  <textarea 
-    id="copyBoxTextarea" 
-    readonly 
-    placeholder="Danh sách đạt điều kiện"
-  ></textarea>
+    <textarea
+      id="copyBoxTextarea"
+      readonly
+      placeholder="Danh sách >= 5"
+    ></textarea>
 
- <div class="buttonRow">
-  <button id="copyBtn" onclick="copyToClipboard()">
-    Copy
-  </button>
+    <button id="copyBtn" onclick="copyToClipboard()">
+      Copy
+    </button>
 
-  <button onclick="exportTxt()">
-    Xuất TXT
-  </button>
-</div>
+    <textarea
+      id="inputHistoryTextarea"
+      readonly
+      placeholder="Lịch sử nhập"
+    ></textarea>
 
-</div>  
-  
-  
-  
+    <textarea
+      id="copyBoxTextarea3"
+      readonly
+      placeholder="Danh sách < 5"
+    ></textarea>
+
+    <button id="copyHistoryBtn" onclick="copyHistory()">
+      Copy 2
+    </button>
+
+    <div class="buttonRow">
+      <button onclick="exportTxt()">
+        Xuất TXT
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Điều khiển số ô -->
   <div id="control">
-   <h1> Số ô kiểm tra:</h1>
-    
-    <input 
-  type="tel"
-  id="boxCountInput"
-  inputmode="numeric"
-  pattern="[0-9]*"
-  min="1"
-  max="20"
-  value="3"
->
-    
-        <button onclick="applyBoxCount()">Tạo</button>
+    <h1>Số ô kiểm tra:</h1>
+
+    <input
+      type="tel"
+      id="boxCountInput"
+      inputmode="numeric"
+      pattern="[0-9]*"
+      min="1"
+      max="20"
+      value="3"
+    >
+
+    <button onclick="applyBoxCount()">
+      Tạo
+    </button>
   </div>
 
 </div>
-
- 
-</div>
+  
+  
+  
+  
 
 <script>
 
-const ipfsURL = "https://tomato-delicate-zebra-533.mypinata.cloud/ipfs/bafkreia4ktxhh5a4kp7kpjdcwphge4f2a3njhself4eoorbhpwhv57slwu";
-
+const ipfsURL = "https://tomato-delicate-zebra-533.mypinata.cloud/ipfs/bafkreigfifp3b3tqtby2xgbq2syhvdh7zbhkgqf7s2pchw3jp4pxs4npoi";
+  
+  
 // ===== DATA =====
 let dataSet = new Set();
+let dataSet2 = new Set();
 let currentDigits = [];
 let CHECK_BOX_COUNT = 3;
 let savedList = [];
 let prevDigits = [];
+let savedListLess5 = [];
+  
+  
+  
+  
+  
+  // ===== DATA CONST =====
+const DATA_1 = [
+"002","006","007","008","011","014","015","017","027","034","036","039","040","041","043","044","047","055","058","068","070","071","072","075","076","077","080","083","085","090","095","096","098",
+"105","115","117","120","122","124","129","131","132","136","137","138","139","144","149","152","155","159","165","167","170","176","177","181","186","190","192","195","196","197","198","199",
+"205","207","210","213","218","219","221","226","229","230","242","244","246","249","251","259","260","263","265","273","274","275","276","278","281","282","283","286","290","291","295","297",
+"300","301","303","304","309","310","311","319","321","322","324","327","331","338","340","346","347","349","365","366","371","375","377","380","384","387","389","390","399",
+"400","402","403","404","412","415","418","430","431","432","434","437","442","445","451","454","457","461","463","464","465","469","480","484","494","496",
+"506","512","513","515","524","526","529","532","533","538","544","545","546","547","551","552","553","555","556","557","559","560","563","569","573","575","576","578","580","582","592","596","597",
+"601","603","605","610","611","612","613","615","621","622","631","634","636","639","645","646","647","650","653","654","655","658","670","690","691","695","699",
+"700","701","703","709","710","712","718","721","728","730","731","733","735","739","740","745","746","752","753","756","757","758","759","761","765","772","773","774","777","778","780","782","783","788","789","795",
+"800","804","807","808","812","814","820","823","829","832","834","838","842","844","849","854","856","858","864","865","869","872","873","880","888","894","895","896","898",
+"905","908","909","910","911","916","917","918","924","931","947","951","955","957","959","966","969","975","977","978","979","980","982","985","987","988","989","990","991","995","999",
+"159","241","415","596","689","897","968"
+];
+
+const DATA_2 = [
+"064","086",
+"154","174","185","191",
+"215","223","293",
+"306","317","326","329","333","355","386",
+"406","410","417","425","475","489","492","493",
+"503","507","508","522","549","561","593","594","599",
+"644","652","659","674",
+"719","726","741","749","787","796",
+"806","850","862","867","885",
+"912","922","925","933","956","965",
+"120","123","212","233","334","341","412"
+];
+
+
+  
+  
+  
 
 // ===== DOM =====
 const boxesContainer = document.getElementById("boxes");
 const boxCountInput = document.getElementById("boxCountInput");
 const result = document.getElementById("resultBox");
-
+const copyBoxTextarea3 = document.getElementById("copyBoxTextarea3");
 const copyBox1 = document.getElementById("copyBox1");
 const copyBox2 = document.getElementById("copyBox2");
 const copyBoxTextarea = document.getElementById("copyBoxTextarea");
-
+const inputHistoryTextarea = document.getElementById("inputHistoryTextarea");
 const copyBtn = document.getElementById("copyBtn");
+  
+  
+  // Gán vào Set
+dataSet = new Set(DATA_1);
+dataSet2 = new Set(DATA_2);
+
+result.textContent = "Sẵn sàng";
+  
+  
+  
 function applyBoxCount() {
 
   const value = parseInt(boxCountInput.value);
@@ -348,6 +444,14 @@ function handleInput(e) {
 
   // Đẩy digit mới vào current
   currentDigits.push(digit);
+  // Ghi lại toàn bộ số nhập, cách nhau bằng dấu cách
+if (inputHistoryTextarea.value === "") {
+  inputHistoryTextarea.value = digit;
+} else {
+  inputHistoryTextarea.value += " " + digit;
+}
+
+inputHistoryTextarea.scrollTop = inputHistoryTextarea.scrollHeight;
 
   if (currentDigits.length > CHECK_BOX_COUNT) {
     const shifted = currentDigits.shift();
@@ -363,9 +467,12 @@ function handleInput(e) {
   updateDisplay();
   updateCopyBoxes();
 
-  if (currentDigits.length === CHECK_BOX_COUNT && dataSet.size) {
-    checkValue();
-  }
+  if (
+  currentDigits.length === CHECK_BOX_COUNT &&
+  (dataSet.size || dataSet2.size)
+) {
+  checkValue();
+}
 
   focusInputBox();
 }
@@ -395,6 +502,12 @@ function checkValue() {
   const allDigitsGTE5 = value
     .split("")
     .every(d => Number(d) >= 5);
+  
+  const allDigitsLT5 = value
+  .split("")
+  .every(d => Number(d) < 5);
+    
+    
 
   if (
   allDigitsGTE5 &&
@@ -424,16 +537,60 @@ function checkValue() {
     copyBoxTextarea.scrollTop = copyBoxTextarea.scrollHeight;
   }
 
-  // ===== Kiểm tra dataset =====
-  result.classList.remove("success", "fail");
+    
+    
+    
+    if (
+  allDigitsLT5 &&
+  copyBox2.value.length === CHECK_BOX_COUNT
+) {
 
-  if (dataSet.has(value)) {
-    result.textContent = "1";
-    result.classList.add("success");
-  } else {
-    result.textContent = "0";
-    result.classList.add("fail");
+  savedListLess5.push(copyBox2.value);
+
+  savedListLess5.sort((a, b) => Number(a) - Number(b));
+
+  const chunkSize = 20;
+  let lines = [];
+
+  for (let i = 0; i < savedListLess5.length; i += chunkSize) {
+    lines.push(
+      savedListLess5
+        .slice(i, i + chunkSize)
+        .map(v => `"${v}"`)
+        .join(",")
+    );
   }
+
+  copyBoxTextarea3.value = lines.join("\n");
+  copyBoxTextarea3.scrollTop = copyBoxTextarea3.scrollHeight;
+}
+    
+    
+  // ===== Kiểm tra dataset =====
+result.classList.remove("success", "fail");
+
+// Nếu có trong const 1
+if (dataSet.has(value)) {
+
+  result.textContent = "1";
+  result.classList.add("success");
+
+}
+// Nếu có trong const 2
+else if (dataSet2.has(value)) {
+
+  result.textContent = "0";
+  result.classList.add("fail");
+
+}
+// Nếu không có ở đâu → bỏ qua
+else {
+
+  result.textContent = "Bỏ qua";
+  result.classList.remove("success", "fail");
+  result.classList.add("neutral");
+
+}
 }
 
 
@@ -464,26 +621,7 @@ function updateCopyBoxes() {
 
 
 
-fetch(ipfsURL)
-  .then(res => res.text())
-  .then(text => {
 
-    const array = text
-      .trim()
-      .replace(/"/g, "")
-      .split(",")
-      .map(x => x.trim())
-      .filter(x => x !== "");
-
-    dataSet = new Set(array);
-
-    result.textContent = "Sẵn sàng";
-  })
-  .catch(err => {
-    result.textContent = "Lỗi tải";
-  });
-
-createBoxes();
 
 
 function exportTxt() {
@@ -514,12 +652,28 @@ function exportTxt() {
 
 
 
+function copyHistory() {
+
+  const text = copyBoxTextarea3.value; // đổi sang textarea < 5
+
+  if (!text) return;
+
+  navigator.clipboard.writeText(text)
+    .then(() => {
+      const btn = document.getElementById("copyHistoryBtn");
+      btn.textContent = "Đã Copy";
+      setTimeout(() => {
+        btn.textContent = "Copy 2";
+      }, 1000);
+    });
+
+}
+createBoxes();
+
 </script>
 
 </body>
 </html>
-
-
 
 
 
